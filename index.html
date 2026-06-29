@@ -65,6 +65,7 @@
     border-left:3px solid transparent;transition:background .12s;user-select:none}
   .team + .team{border-top:1px solid var(--line)}
   .team .fl{font-size:17px;line-height:1;width:22px;text-align:center;flex:none}
+  .team img.fl{width:25px;height:17px;object-fit:cover;border-radius:2px;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
   .team .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
   .team:not(.empty):hover{background:#1d2942}
   .team.pick{background:linear-gradient(90deg,var(--advance),transparent);border-left-color:var(--gold)}
@@ -82,6 +83,7 @@
   .champ-box .l{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold2);font-weight:700}
   .champ-box .c{font-family:"Anton",sans-serif;font-size:20px;text-transform:uppercase;margin-top:5px}
   .champ-box .c .fl{font-family:initial;margin-right:4px}
+  .champ-box .c img.cfl{width:28px;height:18px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:8px;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
   .champ-box .c.empty{color:var(--dead);font-size:13px;font-family:inherit;font-style:italic}
 
   .locked-note{display:none;margin:10px 0;padding:10px 14px;border-radius:10px;background:rgba(25,195,125,.12);border:1px solid rgba(25,195,125,.4);color:#bff3da;font-size:14px;font-weight:600}
@@ -137,15 +139,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 const T={
- RSA:["🇿🇦","South Africa"],CAN:["🇨🇦","Canada"],GER:["🇩🇪","Germany"],PAR:["🇵🇾","Paraguay"],
- NED:["🇳🇱","Netherlands"],MAR:["🇲🇦","Morocco"],BRA:["🇧🇷","Brazil"],JPN:["🇯🇵","Japan"],
- FRA:["🇫🇷","France"],SWE:["🇸🇪","Sweden"],CIV:["🇨🇮","Ivory Coast"],NOR:["🇳🇴","Norway"],
- MEX:["🇲🇽","Mexico"],ECU:["🇪🇨","Ecuador"],ENG:["🏴󠁧󠁢󠁥󠁮󠁧󠁿","England"],COD:["🇨🇩","DR Congo"],
- USA:["🇺🇸","USA"],BIH:["🇧🇦","Bosnia & Herzegovina"],BEL:["🇧🇪","Belgium"],SEN:["🇸🇳","Senegal"],
- POR:["🇵🇹","Portugal"],CRO:["🇭🇷","Croatia"],ESP:["🇪🇸","Spain"],AUT:["🇦🇹","Austria"],
- SUI:["🇨🇭","Switzerland"],ALG:["🇩🇿","Algeria"],ARG:["🇦🇷","Argentina"],CPV:["🇨🇻","Cape Verde"],
- COL:["🇨🇴","Colombia"],GHA:["🇬🇭","Ghana"],AUS:["🇦🇺","Australia"],EGY:["🇪🇬","Egypt"]
+ RSA:["za","South Africa"],CAN:["ca","Canada"],GER:["de","Germany"],PAR:["py","Paraguay"],
+ NED:["nl","Netherlands"],MAR:["ma","Morocco"],BRA:["br","Brazil"],JPN:["jp","Japan"],
+ FRA:["fr","France"],SWE:["se","Sweden"],CIV:["ci","Ivory Coast"],NOR:["no","Norway"],
+ MEX:["mx","Mexico"],ECU:["ec","Ecuador"],ENG:["gb-eng","England"],COD:["cd","DR Congo"],
+ USA:["us","USA"],BIH:["ba","Bosnia & Herzegovina"],BEL:["be","Belgium"],SEN:["sn","Senegal"],
+ POR:["pt","Portugal"],CRO:["hr","Croatia"],ESP:["es","Spain"],AUT:["at","Austria"],
+ SUI:["ch","Switzerland"],ALG:["dz","Algeria"],ARG:["ar","Argentina"],CPV:["cv","Cape Verde"],
+ COL:["co","Colombia"],GHA:["gh","Ghana"],AUS:["au","Australia"],EGY:["eg","Egypt"]
 };
+const FLAG=c=>`https://flagcdn.com/w80/${c}.png`;
 const tm=c=>["t",c], wn=i=>["w",i];
 const M=[
  {c:"R32-1",r:"R32",a:tm("RSA"),b:tm("CAN")},
@@ -214,7 +217,7 @@ function teamRow(i,side){
   const src=M[i][side], code=resolve(src);
   const picked=picks[i]&&picks[i]===code;
   if(!code){const label=src[0]==="w"?("Winner "+M[src[1]].c):"";return `<div class="team empty"><span class="fl">•</span><span class="nm">${label||"—"}</span></div>`;}
-  return `<div class="team ${picked?'pick':''}" data-m="${i}" data-c="${code}"><span class="fl">${T[code][0]}</span><span class="nm">${T[code][1]}</span></div>`;
+  return `<div class="team ${picked?'pick':''}" data-m="${i}" data-c="${code}"><img class="fl" crossorigin="anonymous" src="${FLAG(T[code][0])}" alt=""><span class="nm">${T[code][1]}</span></div>`;
 }
 const bracket=document.getElementById('bracket');
 function render(){
@@ -239,7 +242,7 @@ function render(){
   }));
   const ch=picks[30];
   html+=`<div class="champ-box" style="left:${champX}px;top:${cy[30]-40}px;width:${COLW}px">
-    <div class="l">🏆 Your Winner</div><div class="c ${ch?'':'empty'}">${ch?(`<span class="fl">${T[ch][0]}</span>${T[ch][1]}`):'pick the final'}</div></div>`;
+    <div class="l">🏆 Your Winner</div><div class="c ${ch?'':'empty'}">${ch?(`<img class="cfl" crossorigin="anonymous" src="${FLAG(T[ch][0])}" alt="">${T[ch][1]}`):'pick the final'}</div></div>`;
 
   bracket.style.width=W+"px"; bracket.style.height=Hgt+"px"; bracket.innerHTML=html;
   if(!locked) bracket.querySelectorAll('.team[data-m]').forEach(el=>el.addEventListener('click',()=>choose(+el.dataset.m,el.dataset.c)));
