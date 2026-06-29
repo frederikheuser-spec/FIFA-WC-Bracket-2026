@@ -47,6 +47,9 @@
   .hint{color:var(--dead);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;margin:4px 0 10px;font-weight:600}
 
   .board-shell{overflow-x:auto;padding-bottom:18px}
+  .cap-title{display:none;padding:16px 6px 14px;font-family:"Anton",sans-serif;font-size:24px;
+    letter-spacing:.02em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+  .cap-title small{display:block;font-family:"Barlow Semi Condensed",sans-serif;font-size:14px;letter-spacing:.1em;color:var(--dim);font-weight:600;margin-top:3px}
   .bracket{position:relative;margin-top:2px}
   .links{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
   .lnk{fill:none;stroke:#33456a;stroke-width:1.4;opacity:.5;transition:stroke .15s,opacity .15s}
@@ -62,6 +65,7 @@
     border-left:3px solid transparent;transition:background .12s;user-select:none}
   .team + .team{border-top:1px solid var(--line)}
   .team .fl{font-size:17px;line-height:1;width:22px;text-align:center;flex:none}
+  .team img.fl{width:25px;height:17px;object-fit:cover;border-radius:2px;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
   .team .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
   .team:not(.empty):hover{background:#1d2942}
   .team.pick{background:linear-gradient(90deg,var(--advance),transparent);border-left-color:var(--gold)}
@@ -79,6 +83,7 @@
   .champ-box .l{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold2);font-weight:700}
   .champ-box .c{font-family:"Anton",sans-serif;font-size:20px;text-transform:uppercase;margin-top:5px}
   .champ-box .c .fl{font-family:initial;margin-right:4px}
+  .champ-box .c img.cfl{width:28px;height:18px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:8px;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
   .champ-box .c.empty{color:var(--dead);font-size:13px;font-family:inherit;font-style:italic}
 
   .locked-note{display:none;margin:10px 0;padding:10px 14px;border-radius:10px;background:rgba(25,195,125,.12);border:1px solid rgba(25,195,125,.4);color:#bff3da;font-size:14px;font-weight:600}
@@ -112,7 +117,7 @@
 
   <div class="locked-note" id="lockNote">🔒 Bracket locked. Copy your code below and screenshot this page — then send both to the commissioner.</div>
   <div class="hint" id="hint">← scroll sideways to reach the final →</div>
-  <div class="board-shell"><div class="bracket" id="bracket"></div></div>
+  <div class="board-shell"><div id="capture"><div class="cap-title" id="capTitle"></div><div class="bracket" id="bracket"></div></div></div>
 
   <div class="output" id="output">
     <h3>Your bracket code</h3>
@@ -123,22 +128,27 @@
     </ol>
     <textarea id="code" readonly></textarea>
     <button class="btn copybtn" id="copyBtn">Copy code</button>
+    <button class="btn copybtn" id="imgBtn" style="display:none;margin-left:8px">Download image again</button>
+    <div id="imgHolder"></div>
+    <div id="sendStatus" style="margin-top:10px;font-size:13.5px;font-weight:600;color:var(--dim)"></div>
   </div>
 
   <div class="foot">Official confirmed Round of 32 — group stage completed June 27, 2026. Closing this page before submitting loses your picks, so finish in one sitting.</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 const T={
- RSA:["🇿🇦","South Africa"],CAN:["🇨🇦","Canada"],GER:["🇩🇪","Germany"],PAR:["🇵🇾","Paraguay"],
- NED:["🇳🇱","Netherlands"],MAR:["🇲🇦","Morocco"],BRA:["🇧🇷","Brazil"],JPN:["🇯🇵","Japan"],
- FRA:["🇫🇷","France"],SWE:["🇸🇪","Sweden"],CIV:["🇨🇮","Ivory Coast"],NOR:["🇳🇴","Norway"],
- MEX:["🇲🇽","Mexico"],ECU:["🇪🇨","Ecuador"],ENG:["🏴󠁧󠁢󠁥󠁮󠁧󠁿","England"],COD:["🇨🇩","DR Congo"],
- USA:["🇺🇸","USA"],BIH:["🇧🇦","Bosnia & Herzegovina"],BEL:["🇧🇪","Belgium"],SEN:["🇸🇳","Senegal"],
- POR:["🇵🇹","Portugal"],CRO:["🇭🇷","Croatia"],ESP:["🇪🇸","Spain"],AUT:["🇦🇹","Austria"],
- SUI:["🇨🇭","Switzerland"],ALG:["🇩🇿","Algeria"],ARG:["🇦🇷","Argentina"],CPV:["🇨🇻","Cape Verde"],
- COL:["🇨🇴","Colombia"],GHA:["🇬🇭","Ghana"],AUS:["🇦🇺","Australia"],EGY:["🇪🇬","Egypt"]
+ RSA:["za","South Africa"],CAN:["ca","Canada"],GER:["de","Germany"],PAR:["py","Paraguay"],
+ NED:["nl","Netherlands"],MAR:["ma","Morocco"],BRA:["br","Brazil"],JPN:["jp","Japan"],
+ FRA:["fr","France"],SWE:["se","Sweden"],CIV:["ci","Ivory Coast"],NOR:["no","Norway"],
+ MEX:["mx","Mexico"],ECU:["ec","Ecuador"],ENG:["gb-eng","England"],COD:["cd","DR Congo"],
+ USA:["us","USA"],BIH:["ba","Bosnia & Herzegovina"],BEL:["be","Belgium"],SEN:["sn","Senegal"],
+ POR:["pt","Portugal"],CRO:["hr","Croatia"],ESP:["es","Spain"],AUT:["at","Austria"],
+ SUI:["ch","Switzerland"],ALG:["dz","Algeria"],ARG:["ar","Argentina"],CPV:["cv","Cape Verde"],
+ COL:["co","Colombia"],GHA:["gh","Ghana"],AUS:["au","Australia"],EGY:["eg","Egypt"]
 };
+const FLAG=c=>`https://flagcdn.com/w80/${c}.png`;
 const tm=c=>["t",c], wn=i=>["w",i];
 const M=[
  {c:"R32-1",r:"R32",a:tm("RSA"),b:tm("CAN")},
@@ -189,6 +199,9 @@ const cx=c=>c*STEP;
 
 const picks=new Array(M.length).fill(null);
 let locked=false;
+// ── Auto-submit: paste your Google Apps Script Web App URL between the quotes ──
+const SCRIPT_URL="";
+// (leave blank to keep the copy-code + screenshot flow only)
 const resolve=s=> s[0]==="t" ? s[1] : picks[s[1]];
 function cascade(){for(let i=0;i<M.length;i++){if(picks[i]===null)continue;const a=resolve(M[i].a),b=resolve(M[i].b);if(picks[i]!==a&&picks[i]!==b)picks[i]=null;}}
 function choose(i,code){if(locked||!code)return;picks[i]=code;cascade();render();}
@@ -204,7 +217,7 @@ function teamRow(i,side){
   const src=M[i][side], code=resolve(src);
   const picked=picks[i]&&picks[i]===code;
   if(!code){const label=src[0]==="w"?("Winner "+M[src[1]].c):"";return `<div class="team empty"><span class="fl">•</span><span class="nm">${label||"—"}</span></div>`;}
-  return `<div class="team ${picked?'pick':''}" data-m="${i}" data-c="${code}"><span class="fl">${T[code][0]}</span><span class="nm">${T[code][1]}</span></div>`;
+  return `<div class="team ${picked?'pick':''}" data-m="${i}" data-c="${code}"><img class="fl" crossorigin="anonymous" src="${FLAG(T[code][0])}" alt=""><span class="nm">${T[code][1]}</span></div>`;
 }
 const bracket=document.getElementById('bracket');
 function render(){
@@ -229,7 +242,7 @@ function render(){
   }));
   const ch=picks[30];
   html+=`<div class="champ-box" style="left:${champX}px;top:${cy[30]-40}px;width:${COLW}px">
-    <div class="l">🏆 Your Winner</div><div class="c ${ch?'':'empty'}">${ch?(`<span class="fl">${T[ch][0]}</span>${T[ch][1]}`):'pick the final'}</div></div>`;
+    <div class="l">🏆 Your Winner</div><div class="c ${ch?'':'empty'}">${ch?(`<img class="cfl" crossorigin="anonymous" src="${FLAG(T[ch][0])}" alt="">${T[ch][1]}`):'pick the final'}</div></div>`;
 
   bracket.style.width=W+"px"; bracket.style.height=Hgt+"px"; bracket.innerHTML=html;
   if(!locked) bracket.querySelectorAll('.team[data-m]').forEach(el=>el.addEventListener('click',()=>choose(+el.dataset.m,el.dataset.c)));
@@ -249,13 +262,45 @@ document.getElementById('submitBtn').addEventListener('click',()=>{
   document.getElementById('submitBtn').style.display="none";
   document.getElementById('resetBtn').style.display="none";
   document.getElementById('code').value=[name,...picks.map(c=>T[c][1])].join("\t");
+  if(SCRIPT_URL){
+    const st=document.getElementById('sendStatus');
+    st.textContent="Sending to the commissioner…";
+    fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({name:name,picks:picks.map(c=>T[c][1])})})
+      .then(()=>{st.textContent="✓ Sent automatically — your screenshot is still a good backup.";st.style.color="var(--green)";})
+      .catch(()=>{st.textContent="Couldn't auto-send — please copy the code or screenshot and send it.";st.style.color="var(--gold)";});
+  }
   render();
+  exportImage(name);
   document.getElementById('output').scrollIntoView({behavior:"smooth"});
 });
+function exportImage(name){
+  const cap=document.getElementById('capture'), title=document.getElementById('capTitle'),
+        status=document.getElementById('sendStatus'), ch=picks[30];
+  if(typeof html2canvas!=="function"){status.textContent="Tip: take a screenshot of this page to save your bracket.";return;}
+  title.innerHTML=`🏆 ${name} — World Cup 2026<small>Champion pick: ${ch?T[ch][1]:'—'} · tap-to-advance bracket</small>`;
+  title.style.display="block"; cap.style.width=W+"px";
+  status.textContent="Building your bracket image…"; status.style.color="var(--dim)";
+  html2canvas(cap,{backgroundColor:"#0b1322",scale:2,useCORS:true,width:W,windowWidth:W+40}).then(canvas=>{
+    title.style.display="none"; cap.style.width="";
+    canvas.toBlob(blob=>{
+      const url=URL.createObjectURL(blob);
+      const safe=(name||"bracket").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase();
+      const a=document.createElement("a");a.href=url;a.download=`wc2026-bracket-${safe}.png`;
+      document.body.appendChild(a);a.click();a.remove();
+      document.getElementById("imgHolder").innerHTML=
+        `<img src="${url}" alt="Your bracket" style="width:100%;border:1px solid var(--line);border-radius:10px;margin-top:10px">`+
+        `<div style="color:var(--dim);font-size:13px;margin-top:6px;line-height:1.45">Saved as a PNG. If it didn't download, <b style="color:var(--txt)">long-press the image above → Save to Photos</b>, then send it to the commissioner.</div>`;
+      document.getElementById("imgBtn").style.display="inline-block";
+      status.textContent="✓ Bracket image ready below.";status.style.color="var(--green)";
+    },"image/png");
+  }).catch(()=>{title.style.display="none";cap.style.width="";status.textContent="Couldn't build the image — please screenshot the page instead.";status.style.color="var(--gold)";});
+}
 document.getElementById('copyBtn').addEventListener('click',()=>{
   const ta=document.getElementById('code');ta.select();
   navigator.clipboard.writeText(ta.value).then(()=>{const b=document.getElementById('copyBtn');b.textContent="Copied ✓";setTimeout(()=>b.textContent="Copy code",1600);}).catch(()=>{document.execCommand('copy');});
 });
+document.getElementById('imgBtn').addEventListener('click',()=>exportImage(document.getElementById('name').value.trim()));
 render();
 </script>
 </body>
