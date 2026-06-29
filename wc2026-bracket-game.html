@@ -200,7 +200,7 @@ const cx=c=>c*STEP;
 const picks=new Array(M.length).fill(null);
 let locked=false;
 // ── Auto-submit: paste your Google Apps Script Web App URL between the quotes ──
-const SCRIPT_URL="";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbyeDbV2IU0k16X8s-Z1-yQ8DPg3ZRApUxhygXJ71YpAY8xWvo7Lds31zo0e0Smc3BwM/exec";
 // (leave blank to keep the copy-code + screenshot flow only)
 const resolve=s=> s[0]==="t" ? s[1] : picks[s[1]];
 function cascade(){for(let i=0;i<M.length;i++){if(picks[i]===null)continue;const a=resolve(M[i].a),b=resolve(M[i].b);if(picks[i]!==a&&picks[i]!==b)picks[i]=null;}}
